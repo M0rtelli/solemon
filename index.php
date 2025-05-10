@@ -177,6 +177,11 @@ $result = $stmt->get_result();
                     </a>
                 <?php endif; ?>
             </div>
+            <button class="mobile-menu-toggle" aria-label="Открыть меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </nav>
     </header>
 
@@ -225,6 +230,7 @@ $result = $stmt->get_result();
 
 
     <script src="script/index.js"></script>
+    <script src="script/mobile.js"></script>
     <script>
 
         document.querySelectorAll('a').forEach(link => {
