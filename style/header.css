@@ -98,3 +98,93 @@
         margin-top: 1rem;
     }
 }
+
+/* Мобильная адаптация шапки */
+@media (max-width: 768px) {
+  .main-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-container {
+    gap: 1rem;
+  }
+
+  .logo-img {
+    height: 36px;
+  }
+
+  .nav-links {
+    gap: 0.75rem;
+  }
+
+  .nav-link,
+  .auth-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .nav-link.active::after {
+    bottom: -6px;
+  }
+}
+
+@media (max-width: 640px) {
+  .nav-links {
+    display: none; /* Скрываем обычное меню */
+  }
+
+  /* Показываем кнопку меню только на мобилках */
+  .mobile-menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    margin-left: auto;
+    cursor: pointer;
+  }
+
+  .mobile-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    padding: 1rem;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mobile-menu .nav-link,
+  .mobile-menu .auth-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Скрываем кнопку меню на десктопе */
+@media (min-width: 641px) {
+  .mobile-menu-toggle,
+  .mobile-menu {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .nav-container {
+    padding: 0 8px;
+  }
+
+  .logo-img {
+    max-width: 120px;
+    height: auto;
+  }
+
+  .mobile-menu {
+    left: 8px;
+    right: 8px;
+    width: calc(100% - 16px);
+    border-radius: 8px;
+  }
+}

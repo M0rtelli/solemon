@@ -531,3 +531,9 @@ img {
         padding: 0.2rem 0.6rem;
     }
 }
+
+@media (max-width: 768px) {
+    .header .logo-link {
+        display: none;
+    }
+}

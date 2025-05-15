@@ -274,3 +274,151 @@ body {
         width: 100%;
     }
 }
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 1rem;
+  }
+
+  .admin-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .admin-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-left: 0;
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem;
+    font-size: 0; /* Скрываем текст */
+  }
+
+  .nav-link svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .home-button {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-button span {
+    display: inline;
+    font-size: 14px;
+  }
+
+  .filters {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-form {
+    flex-direction: column;
+  }
+
+  .filter-select, 
+  .filter-btn {
+    width: 100%;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .product-card {
+    padding: 1rem;
+  }
+
+  .product-image {
+    height: 120px;
+  }
+
+  .product-title {
+    font-size: 14px;
+  }
+
+  .action-btn {
+    padding: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-link {
+    padding: 0.75rem;
+    font-size: 14px; /* Показываем текст на очень маленьких экранах */
+  }
+
+  .nav-link svg {
+    display: none;
+  }
+}
+
+/* Дополнение к мобильным стилям (добавить в конец файла) */
+@media (max-width: 768px) {
+  .admin-header {
+    align-items: center; /* Центрируем содержимое */
+    text-align: center; /* Выравнивание текста */
+    padding: 1rem 0.5rem; /* Оптимальные отступы */
+  }
+
+  .admin-header h1 {
+    font-size: 1.25rem; /* Увеличим заголовок */
+    margin-bottom: 0.5rem;
+    width: 100%; /* Занимает всю ширину */
+  }
+
+  .admin-nav {
+    width: 100%;
+    justify-content: space-around; /* Равномерное распределение */
+    padding: 0 0.5rem;
+  }
+
+  .nav-link {
+    font-size: 0; /* Скрываем текст */
+    padding: 0.75rem; /* Увеличиваем область нажатия */
+    position: relative;
+  }
+
+  .nav-link svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  /* Восстанавливаем текст для важных кнопок */
+  .home-button {
+    font-size: 14px !important;
+    padding: 0.5rem 1rem !important;
+  }
+
+  .home-button span {
+    display: inline !important;
+  }
+
+  .home-button svg {
+    margin-right: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header h1 {
+    font-size: 1.1rem; /* Чуть меньше на очень маленьких экранах */
+  }
+
+  .nav-link {
+    padding: 0.6rem;
+  }
+}
