@@ -8,6 +8,13 @@ if (!isset($_SESSION['admin_logged'])) {
 // Подключение к БД
 $conn = new mysqli('MySQL-8.0', 'solemon_site', 'solemon2281488', 'solemon');
 
+// Получение списка категорий из БД
+$categories = [];
+$categories_result = $conn->query("SELECT DISTINCT category FROM products WHERE category IS NOT NULL");
+while ($row = $categories_result->fetch_assoc()) {
+    $categories[] = $row['category'];
+}
+
 // Получение выбранной категории и подкатегории
 $selected_category = $_GET['category'] ?? 'all';
 $selected_subcategory = $_GET['subcategory'] ?? 'all';
@@ -32,7 +39,7 @@ $sql = "SELECT p.*, s.name as subcategory_name
 $params = [];
 $types = '';
 
-if ($selected_category !== 'all' && in_array($selected_category, ['Жидкости', 'Устройства'])) {
+if ($selected_category !== 'all') {
     $sql .= " AND p.category = ?";
     $params[] = $selected_category;
     $types .= 's';
@@ -143,8 +150,11 @@ $result = $stmt->get_result();
             <form method="GET" class="filter-form">
                 <select name="category" class="filter-select">
                     <option value="all" <?= $selected_category === 'all' ? 'selected' : '' ?>>Все категории</option>
-                    <option value="Жидкости" <?= $selected_category === 'Жидкости' ? 'selected' : '' ?>>Жидкости</option>
-                    <option value="Устройства" <?= $selected_category === 'Устройства' ? 'selected' : '' ?>>Устройства</option>
+                    <?php foreach ($categories as $category): ?>
+                        <option value="<?= htmlspecialchars($category) ?>" <?= $selected_category === $category ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($category) ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
                 
                 <select name="subcategory" class="filter-select">

@@ -20,6 +20,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// test
+
 // Получаем параметры фильтрации
 $current_category = $_GET['category'] ?? '';
 $current_subcategory = $_GET['subcategory'] ?? '';
