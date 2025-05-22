@@ -18,25 +18,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Ошибка безопасности. Пожалуйста, обновите страницу.";
     } else {
         // Фильтрация и валидация ввода
-        $username = htmlspecialchars($_POST['username'] ?? '');
-        $password = $_POST['password'] ?? '';
+        $input_username = htmlspecialchars($_POST['username'] ?? ''); // Переименовали переменную
+        $input_password = $_POST['password'] ?? '';
         
         // Подключение к БД
-        $conn = new mysqli('MySQL-8.0', 'solemon_site', 'solemon2281488', 'solemon');
-        
+        $servername = "localhost";
+        $db_username = "admin"; // Переименовали переменную
+        $db_password = "pR0fU7tR1p"; // Переименовали переменную
+        $dbname = "solemon_site";
+
+        $conn = new mysqli($servername, $db_username, $db_password, $dbname);
+        $conn->set_charset("utf8mb4");
+
         if ($conn->connect_error) {
             die("Ошибка подключения: " . $conn->connect_error);
         }
         
         // Поиск пользователя с подготовленным запросом
         $stmt = $conn->prepare("SELECT id, password_hash FROM admins WHERE username = ?");
-        $stmt->bind_param("s", $username);
+        $stmt->bind_param("s", $input_username); // Используем переименованную переменную
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($user = $result->fetch_assoc()) {
             // Верификация пароля
-            if (password_verify($password, $user['password_hash'])) {
+            if (password_verify($input_password, $user['password_hash'])) {
                 // Успешная аутентификация
                 $_SESSION['admin_logged'] = true;
                 $_SESSION['user_id'] = $user['id'];

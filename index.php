@@ -9,18 +9,31 @@ if (isset($_SESSION['logout_message'])) {
 }
 
 // Подключение к базе данных
-$servername = "MySQL-8.0";
-$username = "solemon_site";
-$password = "solemon2281488";
-$dbname = "solemon";
+$servername = "localhost";
+$username = "admin";
+$password = "pR0fU7tR1p";
+$dbname = "solemon_site";
+
 
 $conn = new mysqli($servername, $username, $password, $dbname);
+$conn->set_charset("utf8mb4"); // После подключения к БД
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// test
+// Проверка авторизации
+$is_logged = isset($_SESSION['user_logged']);
+$user_id = $_SESSION['user_id'] ?? null;
+$cart_count = 0;
+
+if ($is_logged) {
+    // Получаем количество товаров в корзине
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM cart WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $cart_count = $stmt->get_result()->fetch_assoc()['count'];
+}
 
 // Получаем параметры фильтрации
 $current_category = $_GET['category'] ?? '';
@@ -44,7 +57,7 @@ while ($row = $subcategories_result->fetch_assoc()) {
 // Формируем SQL-запрос
 $sql = "SELECT p.*, s.name as subcategory_name FROM products p 
         LEFT JOIN subcategories s ON p.subcategory_id = s.id 
-        WHERE 1=1";
+        WHERE p.is_hidden = FALSE"; 
 $params = [];
 $types = '';
 
@@ -162,6 +175,17 @@ $result = $stmt->get_result();
                     </div>
                 </form>
 
+                <!-- Кнопка корзины -->
+                <a href="cart.php" class="cart-button">
+                    <svg viewBox="0 0 24 24" width="20" fill="currentColor">
+                        <path
+                            d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+                    </svg>
+                    <?php if ($cart_count > 0): ?>
+                        <span class="cart-count"><?= $cart_count ?></span>
+                    <?php endif; ?>
+                </a>
+
                 <?php if (isset($_SESSION['admin_logged'])): ?>
                     <a href="admin.php" class="nav-link">
                         Админка
@@ -170,13 +194,23 @@ $result = $stmt->get_result();
                         Выйти
                     </a>
                 <?php else: ?>
-                    <a href="admin-login.php" class="login-button">
-                        <svg class="login-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span>Вход</span>
-                    </a>
+                    <?php if ($is_logged): ?>
+                        <a href="logout.php" class="login-button">
+                            <svg class="login-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span>Выход</span>
+                        </a>
+                    <?php else: ?>
+                        <a href="login.php" class="login-button">
+                            <svg class="login-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span>Вход</span>
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </nav>
@@ -198,34 +232,173 @@ $result = $stmt->get_result();
         </div>
     <?php endif; ?>
 
-    <div class="products-grid">
-        <?php while ($row = $result->fetch_assoc()): ?>
-            <div class="product-card">
-                <img src="<?= $row['image_url'] ?: '/src/img/sad.jpg' ?>" class="product-image" alt="Товар" loading="lazy">
 
-                <div class="product-info">
-                    <h3 class="product-title"><?= htmlspecialchars($row['name']) ?></h3>
-                    <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
-
-                    <div class="product-badges">
-                        <span class="product-badge category-badge"
-                            data-category="<?= htmlspecialchars($row['category']) ?>">
-                            <?= htmlspecialchars($row['category']) ?>
-                        </span>
-
-                        <?php if (!empty($row['subcategory_name'])): ?>
-                            <span class="product-badge subcategory-badge"
-                                data-subcategory="<?= htmlspecialchars($row['subcategory_name']) ?>">
-                                <?= htmlspecialchars($row['subcategory_name']) ?>
-                            </span>
-                        <?php endif; ?>
-                    </div>
+    <?php if (!$is_logged): ?>
+        <div class="auth-required-message">
+            <div class="auth-message-container">
+                <h2>Для просмотра товаров авторизуйтесь</h2>
+                <p>Пожалуйста, войдите в систему, чтобы увидеть содержимое страницы</p>
+                <div class="auth-buttons">
+                    <a href="login.php" class="auth-button">Войти</a>
                 </div>
             </div>
-        <?php endwhile; ?>
-    </div>
+        </div>
+    <?php else: ?>
 
+        <div class="products-grid">
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <div class="product-card">
+                    <img src="<?= $row['image_url'] ?: '/src/img/sad.jpg' ?>" class="product-image" alt="Товар" loading="lazy">
 
+                    <div class="product-info">
+                        <h3 class="product-title"><?= htmlspecialchars($row['name']) ?></h3>
+                        <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
+
+                        <div class="product-badges">
+                            <span class="product-badge category-badge"
+                                data-category="<?= htmlspecialchars($row['category']) ?>">
+                                <?= htmlspecialchars($row['category']) ?>
+                            </span>
+
+                            <?php if (!empty($row['subcategory_name'])): ?>
+                                <span class="product-badge subcategory-badge"
+                                    data-subcategory="<?= htmlspecialchars($row['subcategory_name']) ?>">
+                                    <?= htmlspecialchars($row['subcategory_name']) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+
+                        <button class="add-to-cart" data-product-id="<?= $row['id'] ?>">
+                            <svg viewBox="0 0 24 24" width="20" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                            </svg>
+                            В корзину
+                        </button>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        </div>
+
+    <?php endif; ?>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Обработчик для кнопок "В корзину"
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const productId = this.dataset.productId;
+                    const icon = this.querySelector('svg');
+
+                    try {
+                        // Анимация
+                        this.disabled = true;
+                        icon.style.transform = 'rotate(90deg)';
+
+                        // Отправка запроса
+                        const response = await fetch('api/add_to_cart.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                product_id: productId
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Обновляем счетчик корзины
+                            updateCartCount(result.cart_count);
+
+                            // Анимация успеха
+                            icon.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>';
+                            this.style.background = '#10b981';
+
+                            setTimeout(() => {
+                                icon.innerHTML = '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>';
+                                this.style.background = 'var(--primary)';
+                                icon.style.transform = 'rotate(0)';
+                                this.disabled = false;
+                            }, 2000);
+                        } else {
+                            showError(result.message);
+                            this.disabled = false;
+                            icon.style.transform = 'rotate(0)';
+                        }
+                    } catch (error) {
+                        showError('Ошибка сети');
+                        this.disabled = false;
+                        icon.style.transform = 'rotate(0)';
+                    }
+                });
+            });
+
+            // Функция обновления счетчика корзины
+            function updateCartCount(count) {
+                const cartCount = document.querySelector('.cart-count');
+                const cartButton = document.querySelector('.cart-button');
+
+                if (count > 0) {
+                    if (!cartCount) {
+                        const span = document.createElement('span');
+                        span.className = 'cart-count';
+                        span.textContent = count;
+                        cartButton.appendChild(span);
+                    } else {
+                        cartCount.textContent = count;
+                    }
+                } else if (cartCount) {
+                    cartCount.remove();
+                }
+            }
+
+            // Функция показа ошибок
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-notification';
+                errorDiv.innerHTML = `
+            <svg viewBox="0 0 24 24" width="20" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            ${message}
+        `;
+                document.body.appendChild(errorDiv);
+
+                setTimeout(() => {
+                    errorDiv.classList.add('show');
+                }, 10);
+
+                setTimeout(() => {
+                    errorDiv.classList.remove('show');
+                    setTimeout(() => errorDiv.remove(), 300);
+                }, 3000);
+            }
+        });
+    </script>
+
+    <style>
+        .error-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-notification.show {
+            opacity: 1;
+        }
+    </style>
     <script src="script/index.js"></script>
     <script>
 
@@ -240,6 +413,7 @@ $result = $stmt->get_result();
         document.addEventListener('DOMContentLoaded', function () {
             const categoryButton = document.querySelector('.nav-button');
             const categoryDropdown = document.querySelector('.category-dropdown');
+            
 
             // Адаптация для мобильных устройств
             if (window.innerWidth < 768) {
@@ -285,12 +459,35 @@ $result = $stmt->get_result();
                     }
                 });
             } else {
-                // Для десктопов - закрытие подменю при уходе курсора
-                document.querySelector('.nav-left').addEventListener('mouseleave', function () {
-                    document.querySelectorAll('.subcategory-dropdown').forEach(sub => {
-                        sub.style.display = 'none';
+                // Для десктопов - управление меню при наведении
+                if (window.innerWidth >= 768) {
+                    // Открытие главного меню
+                    categoryButton.addEventListener('mouseenter', function() {
+                        categoryDropdown.classList.add('show');
                     });
-                });
+                    
+                    // Закрытие при уходе курсора
+                    document.querySelector('.nav-left').addEventListener('mouseleave', function() {
+                        categoryDropdown.classList.remove('show');
+                        document.querySelectorAll('.subcategory-dropdown').forEach(sub => {
+                            sub.classList.remove('show');
+                        });
+                    });
+                    
+                    // Управление подменю
+                    document.querySelectorAll('.category-with-submenu').forEach(item => {
+                        item.addEventListener('mouseenter', function() {
+                            const submenu = this.querySelector('.subcategory-dropdown');
+                            if (submenu) {
+                                // Закрываем все другие подменю
+                                document.querySelectorAll('.subcategory-dropdown').forEach(menu => {
+                                    if (menu !== submenu) menu.classList.remove('show');
+                                });
+                                submenu.classList.add('show');
+                            }
+                        });
+                    });
+                }
             }
         });
     </script>

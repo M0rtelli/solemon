@@ -6,8 +6,14 @@ if (!isset($_SESSION['admin_logged'])) {
 }
 
 if (isset($_GET['id'])) {
-    $conn = new mysqli('MySQL-8.0', 'solemon_site', 'solemon2281488', 'solemon');
-    
+    $servername = "localhost";
+    $username = "admin";
+    $password = "pR0fU7tR1p";
+    $dbname = "solemon_site";
+
+
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    $conn->set_charset("utf8mb4"); // После подключения к БД
     // Получаем информацию о изображении для удаления
     $stmt = $conn->prepare("SELECT image_url FROM products WHERE id = ?");
     $stmt->bind_param("i", $_GET['id']);

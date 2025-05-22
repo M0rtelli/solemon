@@ -10,8 +10,14 @@ $success = [];
 $import_count = 0;
 
 // Подключение к БД
-$conn = new mysqli('MySQL-8.0', 'solemon_site', 'solemon2281488', 'solemon');
+$servername = "localhost";
+$username = "admin";
+$password = "pR0fU7tR1p";
+$dbname = "solemon_site";
 
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+$conn->set_charset("utf8mb4"); // После подключения к БД
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['import_file'])) {
     $current_category = '';
 

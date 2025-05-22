@@ -1,9 +1,10 @@
 <?php
 // Настройки подключения к базе данных
-define('DB_HOST', 'MySQL-8.0');
-define('DB_NAME', 'solemon');
-define('DB_USER', 'solemon_site');
-define('DB_PASS', 'solemon2281488');
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'solemon_site');
+define('DB_USER', 'admin');
+define('DB_PASS', 'pR0fU7tR1p');
+
 
 try {
     // Создаем подключение через PDO

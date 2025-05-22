@@ -7,8 +7,14 @@ if (!isset($_SESSION['admin_logged'])) {
 
 $error = '';
 $product = null;
-$conn = new mysqli('MySQL-8.0', 'solemon_site', 'solemon2281488', 'solemon');
+$servername = "localhost";
+$username = "admin";
+$password = "pR0fU7tR1p";
+$dbname = "solemon_site";
 
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+$conn->set_charset("utf8mb4"); // После подключения к БД
 // Получение данных товара
 if (isset($_GET['id'])) {
     $stmt = $conn->prepare("SELECT p.*, s.name as subcategory_name 
